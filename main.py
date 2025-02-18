@@ -68,7 +68,7 @@ def ventana_clientes():
         try:
             id = int(entry_id.get())
         except:
-            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingrsar un dato válido.")
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingresar un dato válido.")
             ventana.focus()
             return
         if entry_id.get() == "" or entry_nombre.get() == "" or entry_email.get() == "" or entry_direccion.get() == "" or entry_telefono.get() == "":
@@ -151,20 +151,19 @@ def ventana_clientes():
                 messagebox.showinfo("Eliminación exitosa", "Se ha eliminado correctamente al cliente con el id "+str(id))
                 print(clientes)
                 ventana.focus()
-        
-        
+
 
 def ventana_reservaciones():
     ventana = tk.Tk()
     ventana.title("Gestión de Reservaciones")
-    ventana.geometry("550x250")
+    ventana.geometry("650x250")
+    
+    habitaciones_libres = [key for key, value in habitaciones.items() if value[2] == "Libre"]
 
     # Etiqueta y entrada para buscar reservación
     tk.Label(ventana, text="Ingrese Reservación:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
     entry_buscar = tk.Entry(ventana, width=20)
     entry_buscar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-    btn_buscar = tk.Button(ventana, text="Buscar Reservación")
-    btn_buscar.grid(row=0, column=2, padx=5, pady=5)
 
     # Campos de entrada
     tk.Label(ventana, text="Reservación ID:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
@@ -172,25 +171,23 @@ def ventana_reservaciones():
     entry_id.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
     tk.Label(ventana, text="Cliente ID:").grid(row=2, column=0, padx=5, pady=5, sticky="e")
-    combo_cliente = ttk.Combobox(ventana, values=[1, 2, 3, 4, 5], width=5)
+    combo_cliente = ttk.Combobox(ventana, values=list(clientes.keys()), width=5)
     combo_cliente.grid(row=2, column=1, padx=5, pady=5, sticky="w")
-    combo_cliente.current(0)
 
     tk.Label(ventana, text="Habitación ID:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
-    combo_habitacion = ttk.Combobox(ventana, values=[10, 11, 12, 13, 14], width=5)
+    combo_habitacion = ttk.Combobox(ventana, values=habitaciones_libres, width=5)
     combo_habitacion.grid(row=3, column=1, padx=5, pady=5, sticky="w")
-    combo_habitacion.current(0)
 
     tk.Label(ventana, text="Costo:").grid(row=4, column=0, padx=5, pady=5, sticky="e")
     entry_costo = tk.Entry(ventana, width=10)
     entry_costo.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
     # Fechas y Hora
-    tk.Label(ventana, text="Fecha Reservación:").grid(row=1, column=2, padx=5, pady=5, sticky="e")
+    tk.Label(ventana, text="Fecha Reservación (DD/MM/AAAA):").grid(row=1, column=2, padx=5, pady=5, sticky="e")
     entry_fecha_res = tk.Entry(ventana, width=15)
     entry_fecha_res.grid(row=1, column=3, padx=5, pady=5, sticky="w")
 
-    tk.Label(ventana, text="Fecha Salida:").grid(row=2, column=2, padx=5, pady=5, sticky="e")
+    tk.Label(ventana, text="Fecha Salida (DD/MM/AAAA):").grid(row=2, column=2, padx=5, pady=5, sticky="e")
     entry_fecha_salida = tk.Entry(ventana, width=15)
     entry_fecha_salida.grid(row=2, column=3, padx=5, pady=5, sticky="w")
 
@@ -199,17 +196,130 @@ def ventana_reservaciones():
     entry_hora.grid(row=3, column=3, padx=5, pady=5, sticky="w")
 
     # Botones
-    btn_nueva = tk.Button(ventana, text="Nueva Reservación")
-    btn_nueva.grid(row=5, column=0, padx=5, pady=10)
+    btn_buscar = tk.Button(ventana, text="Buscar Reservación", command=lambda: buscar_reservacion())
+    btn_buscar.grid(row=0, column=2, padx=5, pady=5)
+    
+    btn_reservar = tk.Button(ventana, text="Reservar", command=lambda: guardar_reservacion())
+    btn_reservar.grid(row=5, column=0, padx=5, pady=10)
 
-    btn_reservar = tk.Button(ventana, text="Reservar")
-    btn_reservar.grid(row=5, column=1, padx=5, pady=10)
+    btn_cancelar = tk.Button(ventana, text="Cancelar Reservación", command=lambda: cancelar_reservacion())
+    btn_cancelar.grid(row=5, column=1, padx=5, pady=10)
 
-    btn_cancelar = tk.Button(ventana, text="Cancelar Reservación")
-    btn_cancelar.grid(row=5, column=2, padx=5, pady=10)
-
-    btn_editar = tk.Button(ventana, text="Editar")
-    btn_editar.grid(row=5, column=3, padx=5, pady=10)
+    btn_editar = tk.Button(ventana, text="Editar", command=lambda: editar_reservacion())
+    btn_editar.grid(row=5, column=2, padx=5, pady=10)
+    
+    def guardar_reservacion():
+        try:
+            id = int(entry_id.get())
+            id_cliente = int(combo_cliente.get())
+            id_habitacion = int(combo_habitacion.get())
+        except:
+            messagebox.showerror("IDs incorrectos", "Los IDs ingresados no son correcto. Favor de ingresar datos válidos.")
+            ventana.focus()
+            return
+        try:
+            costo = float(entry_costo.get())
+        except:
+            messagebox.showerror("Valor de costo inválido", "El valor para el costo es inválido. Favor de ingresar datos válidos.")
+        if (entry_id.get() == "") or (combo_cliente.get() == "") or (combo_habitacion.get()) == "" or (entry_costo.get() == "") or (entry_fecha_res.get() ==  "") or (entry_fecha_salida.get() == "") or (entry_hora.get() == ""):
+            messagebox.showerror("Campos faltantes", "Faltan campos por llenar para guardar el registro.")
+            ventana.focus()
+        elif id in reservaciones:
+            messagebox.showerror("ID existente", "Ya existe una reservación con dicho ID. Favor de ingresar otro.")
+            ventana.focus()
+        elif not ((id_cliente in clientes) or (id_habitacion in habitaciones)):
+            messagebox.showerror("Cliente o habitación inválida", "Favor de elegir un ID de cliente y habitación que se encuentre en la lista.")
+            ventana.focus()
+        else:
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Desea agregar esta reservación?")
+            if confirmation:
+                reservaciones[id] = [id, id_cliente, id_habitacion, costo, entry_fecha_res.get(), entry_fecha_salida.get(), entry_hora.get()]
+                
+                habitaciones[id_habitacion][2] = "Reservado"
+                
+                messagebox.showinfo("Registro exitoso", "Se ha guardado correctamente la reservación en los registros.")
+                ventana.focus()
+                print(reservaciones)
+        
+    def buscar_reservacion():
+        try:
+            id = int(entry_buscar.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingresar un dato válido.")
+            ventana.focus()
+            return
+        if not (id in reservaciones):
+            messagebox.showerror("ID no existente", "No existe ninguna reservación con dicho ID.")
+            ventana.focus()
+        else:
+            id_cliente, id_habitacion, costo, fecha_res, fecha_salida, hora  = reservaciones[id][1], reservaciones[id][2], reservaciones[id][3], reservaciones[id][4], reservaciones[id][5], reservaciones[id][6]
+            entry_id.delete(0, END)
+            entry_id.insert(0, str(id))
+            combo_cliente.delete(0, END)
+            combo_cliente.insert(0, id_cliente)
+            combo_habitacion.delete(0, END)
+            combo_habitacion.insert(0, id_habitacion)
+            entry_costo.delete(0, END)
+            entry_costo.insert(0, costo)
+            entry_fecha_res.delete(0, END)
+            entry_fecha_res.insert(0, fecha_res)
+            entry_fecha_salida.delete(0, END)
+            entry_fecha_salida.insert(0, fecha_salida)
+            entry_hora.delete(0, END)
+            entry_hora.insert(0, hora)
+            
+    def cancelar_reservacion():
+        try:
+            id = int(entry_id.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingresar un dato válido.")
+            ventana.focus()
+            return
+        if not (id in reservaciones):
+            messagebox.showerror("ID no existente", "No existe ninguna reservación con dicho ID.")
+            ventana.focus()
+        else:
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Desea eliminar la reservación con el ID " + str(id) + "?")
+            if confirmation:
+                habitaciones[reservaciones[id][2]][2] = "Libre"
+                reservaciones.pop(id)
+                messagebox.showinfo("Eliminación exitosa", "Se ha eliminado correctamente la reservación con el ID" + str(id))
+                ventana.focus()
+                print(reservaciones)
+                
+    def editar_reservacion():
+        try:
+            id = int(entry_id.get())
+            id_cliente = int(combo_cliente.get())
+            id_habitacion = int(combo_habitacion.get())
+        except:
+            messagebox.showerror("IDs incorrectos", "Los IDs ingresados no son correcto. Favor de ingresar datos válidos.")
+            ventana.focus()
+            return
+        try:
+            costo = float(entry_costo.get())
+        except:
+            messagebox.showerror("Valor de costo inválido", "El valor para el costo es inválido. Favor de ingresar datos válidos.")
+        if (entry_id.get() == "") or (combo_cliente.get() == "") or (combo_habitacion.get()) == "" or (entry_costo.get() == "") or (entry_fecha_res.get() ==  "") or (entry_fecha_salida.get() == "") or (entry_hora.get() == ""):
+            messagebox.showerror("Campos faltantes", "Faltan campos por llenar para guardar el registro.")
+            ventana.focus()
+        elif not ((id_cliente in clientes) or (id_habitacion in habitaciones_libres)):
+            messagebox.showerror("Cliente o habitación inválida", "Favor de elegir un ID de cliente y habitación que se encuentre en la lista.")
+            ventana.focus()
+        else:
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Desea editar la reservación con ID " + str(id) + "?")
+            if confirmation:
+                
+                habitaciones[reservaciones[id][2]][2] = "Libre"
+                reservaciones[id] = [id, id_cliente, id_habitacion, costo, entry_fecha_res.get(), entry_fecha_salida.get(), entry_hora.get()]
+                habitaciones[id_habitacion][2] = "Reservado"
+                
+                messagebox.showinfo("Edición exitosa", "Se ha editado correctamente la reservación.")
+                ventana.focus()
+                print(reservaciones)
+                
+        
+        
 
 def ventana_habitacion():
     ventana = tk.Tk()
@@ -220,9 +330,7 @@ def ventana_habitacion():
     tk.Label(ventana, text="Ingrese Habitación ID:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
     entry_buscar = tk.Entry(ventana, width=15)
     entry_buscar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-    btn_buscar = tk.Button(ventana, text="Buscar Habitación")
-    btn_buscar.grid(row=0, column=2, padx=5, pady=5)
-
+    
     # Campos de entrada
     tk.Label(ventana, text="Habitación ID:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
     entry_id = tk.Entry(ventana, width=10)
@@ -233,90 +341,90 @@ def ventana_habitacion():
     entry_numero.grid(row=2, column=1, padx=5, pady=5, sticky="w")
 
     tk.Label(ventana, text="Estado:").grid(row=3, column=0, padx=5, pady=5, sticky="e")
-    combo_estado = ttk.Combobox(ventana, values=["Libre", "Ocupada"], width=10)
+    combo_estado = ttk.Combobox(ventana, values=["Libre", "Reservado", "Cancelado"], width=10)
     combo_estado.grid(row=3, column=1, padx=5, pady=5, sticky="w")
     combo_estado.current(0)
 
     # Botones
-    btn_nueva = tk.Button(ventana, text="Nueva Habitación")
+    btn_buscar = tk.Button(ventana, text="Buscar Habitación", command=lambda: buscar_habitacion())
+    btn_buscar.grid(row=0, column=2, padx=5, pady=5)
+    
+    btn_nueva = tk.Button(ventana, text="Nueva Habitación", command=lambda: guardar_habitacion())
     btn_nueva.grid(row=4, column=0, padx=5, pady=10)
 
-    btn_editar = tk.Button(ventana, text="Editar")
+    btn_editar = tk.Button(ventana, text="Editar", command=lambda: editar_habitacion())
     btn_editar.grid(row=4, column=1, padx=5, pady=10)
-
-def guardar():
-    confirmation = messagebox.askyesno("¿Desea continuar?", "¿Desa agregar al Registro?")
     
-    if confirmation:
-        if txId.get() in dict_regsitros:
-            messagebox.showerror("Registro no ingresado", "Ya hay un registro con ese ID")
+    def guardar_habitacion():
+        try:
+            id = int(entry_id.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingrsar un dato válido.")
+            ventana.focus()
             return
-        
-        dict_regsitros[int(txId.get())] = [txId.get(), txNombre.get(), txPeso.get(), txTalla.get(), txEdad.get()]
-        messagebox.showinfo("Registro ingresado", "Se ha ingresado al registro")
-        
-    else:
-        messagebox.showinfo("Registro no ingresado", "No se ha ingresado al registro")
-
-def ventana_ver_imc():
-    ventana = tk.Tk()
-    ventana.config(width=300, height=200)
-    ventana.title("Ver IMC")
-
-    lbIngresarId = tk.Label(ventana, text="Ingresar ID: ")
-    lbIngresarId.place(x=10, y=20)
-
-    txIngresarId = tk.Entry(ventana, width=20)
-    txIngresarId.place(x=10, y=50)
-
-    btCalcular=tk.Button(ventana,text="Calcular", command=lambda: calcula_imc())
-    btCalcular.place(x=10, y=80)
-    
-    lbNombre2 = tk.Label(ventana, text="Nombre: ")
-    lbNombre2.place(x=10, y=100)
-    
-    lbIMC2 = tk.Label(ventana, text="IMC: ")
-    lbIMC2.place(x=10, y=130)
-    
-    lbClasificacion = tk.Label(ventana, text="Clasificacion: ")
-    lbClasificacion.place(x=10, y=150)
-    
-    def calcula_imc():
-        id = int(txIngresarId.get())
-        
-        if not (id in dict_regsitros):
-            messagebox.showerror("Registro no encontrado", "No hay un registro con el ID ingresado.")
-            return
+        if entry_id.get() == "" or entry_numero.get() == "" or combo_estado.get() == "":
+            messagebox.showerror("Campos faltantes", "Faltan campos por llenar para guardar el registro")
+            ventana.focus()
+        elif id in habitaciones:
+            messagebox.showerror("ID existente", "Ya existe una habitación con dicho ID. Favor de ingresar otro")
+            ventana.focus()
+        elif not ((combo_estado.get() == "Libre") or (combo_estado.get() == "Reservado") or (combo_estado.get() == "Cancelado")):
+            messagebox.showerror("Estado inválido", "Favor de elegir un estado de la habitación válido")
+            print(combo_estado.get())
+            ventana.focus()
         else:
-            
-            nombre = dict_regsitros[id][1]
-            peso = float(dict_regsitros[id][2])
-            talla = float(dict_regsitros[id][3])
-
-            
-            imc = (peso/(talla*talla))
-            clasificacion = "NA"
-            
-            if imc <= 18.5:
-                clasificacion = "Bajo de peso"
-            elif (imc > 18.5) and (imc < 25):
-                clasificacion = "Normal"
-            elif (imc >= 25) and (imc < 30):
-                clasificacion = "Sobrepeso"
-            elif (imc >= 30) and (imc < 35):
-                clasificacion = "Obesidad I"
-            elif (imc >= 35) and (imc < 40):
-                clasificacion = "Obesidad II"
-            elif (imc >= 40):
-                clasificacion = "Obesidad III"
-            
-            
-            lbNombre2.config(text="Nombre: " + nombre)
-            lbIMC2.config(text="IMC: " + str(imc))
-            lbClasificacion.config(text="Clasificacion: "+ clasificacion )
-            
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Desea agregar esta habitación?")
+            if confirmation:
+                habitaciones[int(entry_id.get())] = [entry_id.get(), entry_numero.get(), combo_estado.get()]
+                messagebox.showinfo("Registro exitoso", "Se ha guardado correctamente la habitación en los registros.")
+                ventana.focus()
+                print(habitaciones)
+    
+    def editar_habitacion():
+        try:
+            id = int(entry_id.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingresar un dato válido.")
+            ventana.focus()
+            return
+        if not (id in habitaciones):
+            messagebox.showerror("ID no existente", "No existe ninguna habitación con dicho ID.")
+            ventana.focus()
+        elif entry_id.get() == "" or entry_numero.get() == "" or combo_estado.get() == "":
+            messagebox.showerror("Campos faltantes", "Faltan campos por llenar para guardar el registro")
+            ventana.focus()
+        elif not ((combo_estado.get() == "Libre") or (combo_estado.get() == "Reservado") or (combo_estado.get() == "Cancelado")):
+            messagebox.showerror("Estado inválido", "Favor de elegir un estado de la habitación válido")
+            print(combo_estado.get())
+            ventana.focus()
+        else:
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Deseas modificar los datos de la habitación con el id " + str(id)+"?")
+            if confirmation:
+                numero, estado = entry_numero.get(), combo_estado.get()
+                habitaciones[id][1] = numero
+                habitaciones[id][2] = estado
+                messagebox.showinfo("Edición exitosa", "Se ha editado correctamente a la habitación con el id " + str(id))
+                print(habitaciones)
+                
+    def buscar_habitacion():
+        try:
+            id = int(entry_buscar.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingresar un dato válido.")
+            ventana.focus()
+            return
+        if not (id in habitaciones):
+            messagebox.showerror("ID no existente", "No existe ninguna habitación  con dicho ID.")
+            ventana.focus()
+        else:
+            numero, estado = habitaciones[id][1], habitaciones[id][2]
+            entry_id.delete(0, END)
+            entry_id.insert(0, str(id))
+            entry_numero.delete(0, END)
+            entry_numero.insert(0, numero)
+            combo_estado.delete(0, END)
+            combo_estado.insert(0, estado)
         
-
 
 
 root.mainloop()
