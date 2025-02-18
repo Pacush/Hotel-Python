@@ -27,8 +27,7 @@ def ventana_clientes():
     tk.Label(ventana, text="Ingrese ID del Cliente:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
     entry_buscar = tk.Entry(ventana, width=20)
     entry_buscar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
-    btn_buscar = tk.Button(ventana, text="Buscar")
-    btn_buscar.grid(row=0, column=2, padx=5, pady=5)
+    
 
     # Campos de entrada
     tk.Label(ventana, text="ID:").grid(row=1, column=0, padx=5, pady=5, sticky="e")
@@ -52,20 +51,86 @@ def ventana_clientes():
     entry_telefono.grid(row=4, column=1, padx=5, pady=5, sticky="w")
 
     # Botones
-    btn_nuevo = tk.Button(ventana, text="Nuevo")
-    btn_nuevo.grid(row=5, column=0, padx=5, pady=10)
+    
+    btn_buscar = tk.Button(ventana, text="Buscar", command=lambda: buscar_cliente())
+    btn_buscar.grid(row=0, column=2, padx=5, pady=5)
+    
+    btn_guardar = tk.Button(ventana, text="Guardar", command=lambda: guardar_cliente())
+    btn_guardar.grid(row=5, column=0, padx=5, pady=10)
 
-    btn_guardar = tk.Button(ventana, text="Guardar")
-    btn_guardar.grid(row=5, column=1, padx=5, pady=10)
-
-    btn_cancelar = tk.Button(ventana, text="Cancelar")
-    btn_cancelar.grid(row=5, column=2, padx=5, pady=10)
-
-    btn_editar = tk.Button(ventana, text="Editar")
-    btn_editar.grid(row=5, column=3, padx=5, pady=10)
+    btn_editar = tk.Button(ventana, text="Editar", command=lambda:editar_cliente())
+    btn_editar.grid(row=5, column=1, padx=5, pady=10)
 
     btn_eliminar = tk.Button(ventana, text="Eliminar")
-    btn_eliminar.grid(row=5, column=4, padx=5, pady=10)
+    btn_eliminar.grid(row=5, column=2, padx=5, pady=10)
+    
+    def guardar_cliente():
+        try:
+            id = int(entry_id.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingrsar un dato válido.")
+            ventana.focus()
+            return
+        if entry_id.get() == "" or entry_nombre.get() == "" or entry_email.get() == "" or entry_direccion.get() == "" or entry_telefono.get() == "":
+            messagebox.showerror("Campos faltantes", "Faltan campos por llenar para guardar el registro")
+        elif id in clientes:
+            messagebox.showerror("ID existente", "Ya existe un cliente con dicho ID. Favor de ingresar otro")
+        else:
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Desea agregar al cliente?")
+            if confirmation:
+                clientes[int(entry_id.get())] = [entry_id.get(), entry_nombre.get(), entry_email.get(), entry_direccion.get(), entry_telefono.get()]
+                messagebox.showinfo("Registro exitoso", "Se ha guardado correctamente al cliente en los registros.")
+                print(clientes)
+                
+    def buscar_cliente():
+        try:
+            id = int(entry_buscar.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingrsar un dato válido.")
+            ventana.focus()
+            return
+        if not (id in clientes):
+            messagebox.showerror("ID no existente", "No existe ningún cliente con dicho ID.")
+            ventana.focus()
+        else:
+            nombre, email, direccion, telefono = clientes[id][1], clientes[id][2], clientes[id][3], clientes[id][4]
+            entry_id.delete(0, END)
+            entry_id.insert(0, str(id))
+            entry_nombre.delete(0, END)
+            entry_nombre.insert(0, nombre)
+            entry_email.delete(0, END)
+            entry_email.insert(0, email)
+            entry_direccion.delete(0, END)
+            entry_direccion.insert(0, direccion)
+            entry_telefono.delete(0, END)
+            entry_telefono.insert(0, telefono)
+            
+    def editar_cliente():
+        try:
+            id = int(entry_id.get())
+        except:
+            messagebox.showerror("ID incorrecto", "El ID ingresado no es correcto. Favor de ingrsar un dato válido.")
+            ventana.focus()
+            return
+        if not (id in clientes):
+            messagebox.showerror("ID no existente", "No existe ningún cliente con dicho ID.")
+            ventana.focus()
+            
+        elif entry_id.get() == "" or entry_nombre.get() == "" or entry_email.get() == "" or entry_direccion.get() == "" or entry_telefono.get() == "":
+            messagebox.showerror("Campos faltantes", "Faltan campos por llenar para guardar el registro")
+        
+        else:
+            confirmation = messagebox.askyesno("¿Desea continuar?", "¿Deseas modificar los datos del cliente ?"+ str(id))
+            if confirmation:
+                nombre, email, direccion, telefono = entry_nombre.get(), entry_email.get(), entry_direccion.get(), entry_telefono.get()
+                clientes[id][1] = nombre
+                clientes[id][2] = email
+                clientes[id][3] = direccion
+                clientes[id][4] = telefono
+                messagebox.showinfo("Edición exitoso", "Se ha editado correctamente al cliente con el id "+str(id))
+                print(clientes)
+        
+        
 
 def ventana_reservaciones():
     ventana = tk.Tk()
