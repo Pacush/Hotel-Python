@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import END, messagebox, ttk
 
-dict_regsitros = {}
+clientes = {}
+reservaciones = {}
+habitaciones = {}
 
 root = tk.Tk()
 root.config(width=300, height=350)
@@ -22,7 +24,7 @@ def ventana_clientes():
     ventana.geometry("800x300")
 
     # Etiqueta y entrada para buscar cliente
-    tk.Label(ventana, text="Ingrese Id del Cliente:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
+    tk.Label(ventana, text="Ingrese ID del Cliente:").grid(row=0, column=0, padx=5, pady=5, sticky="e")
     entry_buscar = tk.Entry(ventana, width=20)
     entry_buscar.grid(row=0, column=1, padx=5, pady=5, sticky="w")
     btn_buscar = tk.Button(ventana, text="Buscar")
